@@ -13,10 +13,8 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const audioPlaylist = [{uri:
-  'https://ia600204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_act5_shakespeare.mp3'},
-{uri:
-  'https://ia800204.us.archive.org/11/items/hamlet_0911_librivox/hamlet_a_shakespeare.mp3'}];
+const audioPlaylist = [{uri: 'https://drive.google.com/file/d/1cYbViVwcbclS--SemqF29YSZ3QevXdBQ/view?usp=sharing'},
+{uri: 'https://drive.google.com/file/d/1cYbViVwcbclS--SemqF29YSZ3QevXdBQ/view?usp=sharing'}];
 //   const  runTests = async () => {
 //   const URL = 'https://www.youtube.com/watch?v=04GiqLjRO3A';
 //   let FAILED_TEST_COUNT = 0;
@@ -159,8 +157,15 @@ const audioPlaylist = [{uri:
 //   console.log('###########################################');
  
 // };
-export default class Home extends React.Component {
- 
+
+export default function App() {
+  state = {
+    playbackInstance: null,
+    currentIndex: 0,
+    volume: 1.0,
+    isBuffering: false
+  }
+  const [isPlaying, setisPlaying] = React.useState();
  componentDidMount = async()=>{
   try {
     await Audio.setAudioModeAsync({
@@ -178,135 +183,153 @@ export default class Home extends React.Component {
     console.log(e)
   }
 };
-
-loadAudio = async () =>{
-  const {currentIndex, isPlaying, volume} = this.state
-  console.log(currentIndex);
-  try {
-    const playbackInstance = new Audio.Sound()
-    const source = {
-      uri: audioPlaylist[currentIndex].uri
-    }
-
-    const status = {
-      shouldPlay: isPlaying,
-      volume
-    }
-
-    playbackInstance.setOnPlaybackStatusUpdate(this.onPlaybackStatusUpdate)     
-    await playbackInstance.loadAsync(source, status, false)
-    this.setState({playbackInstance})
-    } catch (e) {
-      console.log(e)
-    }
+const [sound, setSound] = React.useState();
+loadAudio = async () =>{ 
+  setImage(true)
+  setisPlaying(false)
+  iconeplay()
+  console.log('Loading Sound');
+  const { sound } = await Audio.Sound.createAsync(
+    require('../assets/audi2.mp3')
+ );
+ setSound(sound);
 };
 
- onPlaybackStatusUpdate = status => {
-  this.setState({
-    isBuffering: status.isBuffering
-  })
-};
- handlePlayPause = async () => {
-  const { isPlaying, playbackInstance } = this.state
-  isPlaying ? await playbackInstance.pauseAsync() : await playbackInstance.playAsync()
-
-  this.setState({
-    isPlaying: !isPlaying
-  })
+const [image, setImage] = React.useState();
+imagesound = ()=>{
+if (image == true) {
+  return(
+    <Image
+      style={style.albumCover}
+      source={{ uri: 'https://media.wired.com/photos/5f9ca518227dbb78ec30dacf/master/w_2560%2Cc_limit/Gear-RIP-Google-Music-1194411695.jpg' }}
+    />
+  );
 }
-
-  handlePreviousTrack = async () => {
-  let { playbackInstance, currentIndex } = this.state
-  if (playbackInstance) {
-    await playbackInstance.unloadAsync()
-    currentIndex < audioPlaylist.length - 1 ? (currentIndex -= 1) : (currentIndex = 0)
-    this.setState({
-      currentIndex : currentIndex
-    })
-    this.loadAudio()
+  
+}
+iconeplay = ()=>{
+  if (isPlaying==null) {
+    return(
+      <Text></Text>
+    );
   }
-};
-
-handleNextTrack = async () => {
-  let { playbackInstance, currentIndex } = this.state
-  if (playbackInstance) {
-    await playbackInstance.unloadAsync()
-    currentIndex < audioPlaylist.length - 1 ? (currentIndex += 1) : (currentIndex = 0)
-    this.setState({
-      currentIndex : currentIndex
-    })
-    this.loadAudio()
+  if (isPlaying == false) {
+    return(
+      <Ionicons name="ios-play-circle" nameicone size={60} color='#444' />
+    );
+  } else {
+    return(
+      <Ionicons name="pause-outline" nameicone size={60} color='#444' />
+    );
   }
-};
-  addUrl() {
-    const {audioPlaylist} = this.state;
-    audioPlaylist.unshift({uri: 'test'});
-    //console.log(audioPlaylist);
-    this.setState({ audioPlaylist: audioPlaylist.slice(0)});
-  };
-  state = {
-      search: ''
-  };
+}
+ handlePlayPause = async () => {
+  iconeplay();
+   console.log(isPlaying )
+  if ( isPlaying == false) {
+    console.log("false")
+    playSound()
+    setisPlaying(true)
+  } 
+  if ( isPlaying == true) {
+    console.log("true")
+    pauseSound();
+    setisPlaying(false)
+  }
+
+}
+ 
+  playSound = async () => {
+          await sound.playAsync(); 
+  }
+  pauseSound = async () => {
+    await sound.pauseAsync(); 
+  }
+//   handlePreviousTrack = async () => {
+//   let { playbackInstance, currentIndex } = this.state
+//   if (playbackInstance) {
+//     await playbackInstance.unloadAsync()
+//     currentIndex < audioPlaylist.length - 1 ? (currentIndex -= 1) : (currentIndex = 0)
+//     this.setState({
+//       currentIndex : currentIndex
+//     })
+//     this.loadAudio()
+//   }
+// };
+
+// handleNextTrack = async () => {
+//   let { playbackInstance, currentIndex } = this.state
+//   if (playbackInstance) {
+//     await playbackInstance.unloadAsync()
+//     currentIndex < audioPlaylist.length - 1 ? (currentIndex += 1) : (currentIndex = 0)
+//     this.setState({
+//       currentIndex : currentIndex
+//     })
+//     this.loadAudio()
+//   }
+// }
+  // addUrl = () =>{
+  //   const {audioPlaylist} = this.state;
+  //   audioPlaylist.unshift({uri: 'test'});
+  //   //console.log(audioPlaylist);
+  //   this.setState({ audioPlaylist: audioPlaylist.slice(0)});
+  // };
+  const [search, setSearch] = React.useState();
     updateSearch = (search) => {
-        this.setState({ search });
+        setSearch( search )
       };
-      teste () {
+      teste = () => {
         runTests();
         
       }
-
-      audios() {
-        return audioPlaylist.map(function(news, i){
-          return(
-            <View key={i}>
-              <Text>{news.uri}</Text>
-            </View>
-          );
-        });
-      }
-    render() {
-      const { search } = this.state;
+     
+     
+        
+      // audios = () => {
+      //   return audioPlaylist.map(function(news, i){
+      //     return(
+      //       <View key={i}>
+      //         <Text>{news.uri}</Text>
+      //       </View>
+      //     );
+      //   });
+      // }
       
-        return (
-            
+     return (
+          
             <SafeAreaView>
               <ScrollView style={style.scrollView} contentInsetAdjustmentBehavior="automatic" >
                <View style={style.view}>
                 <SearchBar
                    barStyle="dark-content"
                     placeholder="Type Here..."
-                    onChangeText={this.updateSearch}
+                    onChangeText={updateSearch}
                     value={search}
                 />
-                <Text >{this.state.search} </Text>
+                <Text >{search} </Text>
                 <Button
                 style={style.title}
                 title="Search"
                />
+                <Button title="add sound" onPress={loadAudio} />
               </View>
 
               <View>
-              {this.audios()}
+              {/* {audios()} */}
               </View>
-              <Image
-                  style={style.albumCover}
-                  source={{ uri: 'http://www.archive.org/download/LibrivoxCdCoverArt8/hamlet_1104.jpg' }}
-                />
+             { imagesound()}
+             
               <View style={style.controls}>
-                  
+{/*                   
                 <TouchableOpacity style={style.control} onPress={this.handlePreviousTrack}>
                   <Ionicons name='caret-back-outline' size={48} color='#444' />
+                </TouchableOpacity> */}
+                <TouchableOpacity style={style.control} onPress={handlePlayPause}>
+                    {iconeplay()}
                 </TouchableOpacity>
-                <TouchableOpacity style={style.control} onPress={this.handlePlayPause}>
-                  {this.state.isPlaying ? (
-                    <Ionicons name='pause-outline' size={48} color='#444' />
-                      ) : (
-                    <Ionicons name='ios-play-circle' size={48} color='#444' />
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity style={style.control}  onPress={this.handleNextTrack}>
+                {/* <TouchableOpacity style={style.control}  onPress={this.handleNextTrack}>
                   <Ionicons name='caret-forward-outline' size={48} color='#444' />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 </View>
             
               <Header />
@@ -328,7 +351,7 @@ handleNextTrack = async () => {
           </SafeAreaView>
           
         );
-    }
+    
   }
 const style = StyleSheet.create({
   scrollView: {
@@ -385,7 +408,7 @@ const style = StyleSheet.create({
       flexDirection: 'row'
     },
     control: {
-      margin: 20
+      marginLeft: 100
     },
 
   albumCover: {
