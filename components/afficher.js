@@ -1,170 +1,21 @@
-import React, {components} from 'react';
+import React,{ useState }  from 'react';
 import { SearchBar } from 'react-native-elements';
 import ytdl from "react-native-ytdl"
-import { StyleSheet,View,SafeAreaView,ScrollView,Text,Alert,Button,TouchableOpacity,Image} from 'react-native';
+import { StyleSheet,View,SafeAreaView,ScrollView,Text,Alert,Button,TouchableOpacity,Image,Picker} from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Permissions from 'expo-permissions';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+// import { searchLyrics } from '../util/api';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-import {
-  Header,
-  Colors,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const audioPlaylist = [{uri: 'https://drive.google.com/file/d/1cYbViVwcbclS--SemqF29YSZ3QevXdBQ/view?usp=sharing'},
-{uri: 'https://drive.google.com/file/d/1cYbViVwcbclS--SemqF29YSZ3QevXdBQ/view?usp=sharing'}];
-//   const  runTests = async () => {
-//   const URL = 'https://www.youtube.com/watch?v=04GiqLjRO3A';
-//   let FAILED_TEST_COUNT = 0;
-
-//   const downloadURLsToFile = async (url, path) =>{
-   
-//     let Permission = await Permissions.getAsync(Permissions.AUDIO_RECORDING);
-//     if (Permission.status !== 'granted') {
-//       Permission = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-//     }
-//     if (Permission.status === 'granted') {
-//       const fileInfo = await FileSystem.getInfoAsync(path);
-//       if (fileInfo.exists === true ) {
-//         await FileSystem.deleteAsync(path);
-//       }
-      
-//       FileSystem.downloadAsync(url,path).then( ({sons}) => {
-//         this.setState(prevState => ({
-//           audioPlaylist: [...prevState.audioPlaylist, {uri: sons}]
-//         }))
-//         alert('Saved to sons');
-//         console.log('start')}).catch( e => console.log('error'));
-//       console.log('The file is saved to:', path);
-//     } else {
-//       Alert.alert(
-//         'Permission Denied!',
-//         'You need to give storage permission to download the file'
-//       );
-//       return;
-//     }
-//   };
-//   const testURLIsValidAndVideoIdIsExtracted = () => {
-//     /**
-//      * Just Testing getVideoID(URL) with URL input (not videoId) will implicitly test the following as well:
-//      * - ytdl.validateURL()
-//      * - ytdl.getURLVideoID()
-//      */
-//     console.log('🚀 [TEST] "testURLIsValidAndVideoIdIsExtracted" has started');
-//     const videoId = ytdl.getVideoID(URL);
-//     if (videoId !== "04GiqLjRO3A") {
-//       console.error('❌ [TEST FAILED] "testURLIsValidAndVideoIdIsExtracted": ' +
-//         `EXPECTED "videoId === 04GiqLjRO3A  BUT GOT "${videoId}"`);
-//       FAILED_TEST_COUNT++;
-//     } else {
-//       console.log('✅ [TEST] "testURLIsValidAndVideoIdIsExtracted" has passed');
-//     }
-//   };
-
-//   const testDownloadableURLIsSavedToFile = async () => {
-    
-//     /**
-//      * Just Testing ytdl(, {quality:'highestaudio'}) will implicitly test the following as well:
-//      * - ytdl.chooseFormat()
-//      * - ytdl.getInfo()
-//      * - ytdl.getBasicInfo()
-//      */
-//     console.log('🚀 [TEST] "testDownloadableURLIsSavedToFile" has started');
-//     const downloadableURLs = await ytdl(URL, { quality: 'highestaudio' });
-//     const path = FileSystem.documentDirectory + '/file.mp3';
-//     const savedPath = await downloadURLsToFile(downloadableURLs, path);
-
-//     const fileStat = await FileSystem.getInfoAsync(savedPath);
-//     const size = fileStat.size;
-//     console.log(size);
-//     if (size < 687230) {
-//       console.error('❌ [TEST FAILED] "testDownloadableURLIsSavedToFile": ' +
-//         `EXPECTED "size >= 687230" BUT GOT "${size}"`);
-//       FAILED_TEST_COUNT++;
-//     } else {
-      
-//       console.log('✅ [TEST] "testDownloadableURLIsSavedToFile" has passed '+`"${size}"`);
-//     }
-//   };
-
-//   const testCache = () => {
-//     /**
-//      * Cache will be filled with data after a URLs info has been retrieved or
-//      * if html5player player tokens are saved.
-//      *
-//      * Note: This test needs to be run after fetching a downloadable URL
-//      */
-//     console.log('🚀 [TEST] "testCache" has started');
-//     const cache = ytdl.cache;
-//     if (!cache.sig || !cache.info) {
-//       console.error('❌ [TEST FAILED] "testCache": ' +
-//         `EXPECTED "cache.sig && cache.info" BUT GOT "cache.sig: ${cache.sig}" cache.info:"${cache.info}"`);
-//       FAILED_TEST_COUNT++;
-//     } else {
-//       console.log('✅ [TEST] "testCache" has passed');
-//     }
-//   };
-//   console.log('###########################################');
-//   console.log('###########################################');
-//   console.log('###########################################');
-//   console.log('###########################################');
-//   console.log('############# STARTING TESTS ##############');
-//   console.log('###########################################');
-//   console.log('NOTE: Testing should be done on a physical device so the file storage permission can be easily enabled');
-//   console.log('###########################################');
-//   let urlss =  await ytdl(URL, { quality: 'highestaudio' });
-//       let dl = FileSystem.createDownloadResumable(
-//         urlss,
-//         FileSystem.documentDirectory + 'file.mp4',
-//         { },
-//         progress => {}
-//     );
-//     dl.downloadAsync().then( () => console.log('start')).catch( e => console.log('error'));
-
-//     dl.pauseAsync().then( result => console.log(result) );
-    
-//   console.log('Finished downloading to A');
-//   const downloadSnapshotJson = await AsyncStorage.getItem('pausedDownload');
-//   const downloadSnapshot = JSON.parse(downloadSnapshotJson);
-//   const downloadResumable = new FileSystem.DownloadResumable(
-//     downloadSnapshot.url,
-//     downloadSnapshot.fileUri,
-//     downloadSnapshot.options,
-//     callback,
-//     downloadSnapshot.resumeData
-//   );
-
-//   const { uri } = await downloadResumable.resumeAsync();
-//     console.log('Finished downloading to ', uri);
-//   try {
-//     const { uri } = await downloadResumable.resumeAsync();
-//     console.log('Finished downloading to ', uri);
-//   } catch (e) {
-//     console.error(e);
-//   }
-//   testURLIsValidAndVideoIdIsExtracted();
-//   await testDownloadableURLIsSavedToFile();
-//   testCache();
-
-//   console.log('###########################################');
-//   console.log('###########################################');
-//   console.log('###########################################');
-//   console.log('###########################################');
-//   console.log('####### TESTS HAVE FINISHED RUNNING #######');
-//   console.log(`############# ${FAILED_TEST_COUNT} TESTS FAILED `.padEnd(43, '#'));
-//   console.log('###########################################');
- 
-// };
 
 export default function App() {
-  state = {
-    playbackInstance: null,
-    currentIndex: 0,
-    volume: 1.0,
-    isBuffering: false
-  }
+
+  const [urlfile, setUrl] = React.useState();
+  const [selectedValue, setSelectedValue] = useState("selector lang");
+ 
   const [isPlaying, setisPlaying] = React.useState();
  componentDidMount = async()=>{
   try {
@@ -177,35 +28,130 @@ export default function App() {
       staysActiveInBackground: true,
       playThroughEarpieceAndroid: true
     })
-
-    this.loadAudio()
-  } catch (e) {
+   this.loadAudio()
+  } catch (e) { 
     console.log(e)
   }
 };
 const [sound, setSound] = React.useState();
+const [search, setSearch] = React.useState();
+const [lyrics, setlyrics] = React.useState();
+const [copyright, setcopyright] = React.useState();
+const [trackingUrl, settrackingUrl] = React.useState();
+const [addlyrics, setAddlyrics] = React.useState();
+
 loadAudio = async () =>{ 
-  setImage(true)
-  setisPlaying(false)
-  iconeplay()
+
+  console.log(search)
   console.log('Loading Sound');
+  const youtubeURL = search;
+  const urls = await ytdl(youtubeURL, { quality: 'highestaudio' });
+
+  await setTimeout(() => {
+  
+  console.log(urls[0]["url"])
+  }, 3000);
+ 
+  //setUrl(urls[0]["url"])
+  // const soundObject = new Audio.Sound();
+  //     await soundObject.loadAsync({uri: "https://github.com/rougetsall/My_musicrouget/blob/master/assets/sonnerie-diphone.mp3"})
+  //     // uri: "https://github.com/rougetsall/My_musicrouget/blob/master/assets/sonnerie-diphone.mp3"}
   const { sound } = await Audio.Sound.createAsync(
-    require('../assets/audi2.mp3')
+   require('../assets/audi2.mp3')
+   //{uri: "https://r4---sn-cv0tb0xn-jqbr.googlevideo.com/videoplayback?expire=1607924864&ei=IKjWX-71J8HMW8b3qng&ip=89.90.147.30&id=o-AE7iTxYgAPDCcCXQsPDskPH0J3Dx3t2SWDudLSkEPxcK&itag=251&source=youtube&requiressl=yes&mh=hI&mm=31%2C29&mn=sn-cv0tb0xn-jqbr%2Csn-25glen7r&ms=au%2Crdu&mv=m&mvi=4&pl=18&initcwndbps=1222500&vprv=1&mime=audio%2Fwebm&ns=TQWYokCCcZiC7ZVNrwddT0MF&gir=yes&clen=3967521&dur=235.101&lmt=1604154789310241&mt=1607902848&fvip=6&keepalive=yes&c=WEB&txp=5431432&n=r6JVQvLWmmyJNXl5F&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cvprv%2Cmime%2Cns%2Cgir%2Cclen%2Cdur%2Clmt&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIhALBMWecFACDLlZL0xpve9VEs75DD0XAS7MllcHJ6S_A6AiBrjbuv7hfEwYEbDzyXSp8DSvLvi8aB4qlJSmWn6fUsGQ%3D%3D&ratebypass=yes&sig=AOq0QJ8wRAIgK5qo3E4xUwN9pTY7gz0YjgqZ0zDLUULAizyA2T_VkKkCIHRegLfYJbNB062aDkPb8n0CYcM9C7B9rEyFH4lNNJH6"}
  );
- setSound(sound);
+// await SoundPlayer.loadUrl({uri: "https://raw.githubusercontent.com/rougetsall/My_musicrouget/master/assets/sonnerie-diphone.mp3"})
+ await setTimeout(() => {
+
+  setSound(sound);
+  setImage(true)
+   setisPlaying(false)
+   iconeplay()
+   setlang(true)
+ }, 7000);
+
 };
+
+
+loadlyrics = async() =>{
+  setlyrics("les parole : ")
+
+  const infosartice = addlyrics.split(',');
+  const name = infosartice[0];
+  const title = infosartice[1];
+  console.log(name +' et '+title)
+  const API_KEY = '51e607101d80c3ef2ed9492c55f0db61';
+  await fetch(`https://api.musixmatch.com/ws/1.1/track.search?q_artist=${name}&q_track=${title}&page_size=15&page=1&s_track_rating=desc&apikey=${API_KEY}`)
+      .then((chart)=> chart.json())
+      .then((chartJson)=>{
+        setTimeout(() => {
+          chartJson.message.body.track_list.forEach(element => {
+              fetch(`http://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id=${element.track["track_id"]}&apikey=${API_KEY}`)
+                .then((chart)=> chart.json())
+                .then((chartJson)=>{
+                 
+                    if (chartJson.message.body.lyrics.lyrics_body != null) {
+                      console.log(chartJson.message.body.lyrics.lyrics_body)
+                      setlyrics(lyrics+chartJson.message.body.lyrics.lyrics_body)
+                    }
+                   
+                    // if (chartJson.message.body.lyrics["lyrics_body"]) {
+                    //   settextlyrics(textlyrics+chartJson.message.body.lyrics["lyrics_body"])
+                      
+                    // }
+                  
+                }).catch((error) => {
+                    console.error(error);
+                  });
+          });
+          setAffichlycs(true)
+          setlang(true)
+        //  setAddlyrics( chartJson.message.body.lyrics)
+          }, 7000);
+      }).catch((error) => {
+          console.error(error);
+        });
+  //getLyrics(name,title)
+//   setTimeout(() => {
+//     console.log(textlyrics)
+ 
+//  }, 7000);
+}
 
 const [image, setImage] = React.useState();
 imagesound = ()=>{
-if (image == true) {
-  return(
-    <Image
-      style={style.albumCover}
-      source={{ uri: 'https://media.wired.com/photos/5f9ca518227dbb78ec30dacf/master/w_2560%2Cc_limit/Gear-RIP-Google-Music-1194411695.jpg' }}
-    />
-  );
+  if (image == true) {
+    return(
+      <Image
+        style={style.albumCover}
+        source={{ uri: 'https://media.wired.com/photos/5f9ca518227dbb78ec30dacf/master/w_2560%2Cc_limit/Gear-RIP-Google-Music-1194411695.jpg' }}
+      />
+    );
+  } 
 }
-  
+const [lang, setlang] = React.useState();
+selectorLang =()=>{
+  if (lang == true) {
+    return (
+
+      <View style={style.selector}>
+        <Picker
+          selectedValue={selectedValue}
+          style={ {height: 50,
+            width: 160,marginTop:5}}
+          onValueChange={(itemValue, itemIndex) => setSelectedValue(itemValue)}
+        >
+          <Picker.Item label="selector langue"  />
+          <Picker.Item label="french" value="french" />
+          <Picker.Item label="anglais" value="anglais" />
+          <Picker.Item label="espagnols" value="espagnols" />
+          <Picker.Item label="italien" value="italien" />
+          <Picker.Item label="arabe" value="arabe" />
+        
+        </Picker>
+      </View>
+    );
+  }
 }
 iconeplay = ()=>{
   if (isPlaying==null) {
@@ -240,114 +186,90 @@ iconeplay = ()=>{
 }
  
   playSound = async () => {
-          await sound.playAsync(); 
+    await sound.playAsync()
   }
   pauseSound = async () => {
-    await sound.pauseAsync(); 
+    await sound.pauseAsync()
   }
-//   handlePreviousTrack = async () => {
-//   let { playbackInstance, currentIndex } = this.state
-//   if (playbackInstance) {
-//     await playbackInstance.unloadAsync()
-//     currentIndex < audioPlaylist.length - 1 ? (currentIndex -= 1) : (currentIndex = 0)
-//     this.setState({
-//       currentIndex : currentIndex
-//     })
-//     this.loadAudio()
-//   }
-// };
-
-// handleNextTrack = async () => {
-//   let { playbackInstance, currentIndex } = this.state
-//   if (playbackInstance) {
-//     await playbackInstance.unloadAsync()
-//     currentIndex < audioPlaylist.length - 1 ? (currentIndex += 1) : (currentIndex = 0)
-//     this.setState({
-//       currentIndex : currentIndex
-//     })
-//     this.loadAudio()
-//   }
-// }
-  // addUrl = () =>{
-  //   const {audioPlaylist} = this.state;
-  //   audioPlaylist.unshift({uri: 'test'});
-  //   //console.log(audioPlaylist);
-  //   this.setState({ audioPlaylist: audioPlaylist.slice(0)});
-  // };
-  const [search, setSearch] = React.useState();
     updateSearch = (search) => {
         setSearch( search )
       };
-      teste = () => {
-        runTests();
-        
-      }
-     
-     
-        
-      // audios = () => {
-      //   return audioPlaylist.map(function(news, i){
-      //     return(
-      //       <View key={i}>
-      //         <Text>{news.uri}</Text>
-      //       </View>
-      //     );
-      //   });
-      // }
-      
+  updatelyrics = (addlyrics) => {
+    setAddlyrics( addlyrics )
+  };
+// getLyrics = (name,title) => {
+//   searchLyrics(name,title)
+//       .then(result => {
+//         setlyrics(result.lyrics_body)
+//         setcopyright(result.lyrics_copyright)
+//         settrackingUrl(result.pixel_tracking_url)
+//         setAffichlycs(true)
+//       })
+//       .catch((error) => {
+//           throw error;
+//   });
+// };
+const [affichlycs, setAffichlycs] = React.useState();
+affichelyrics  =()=>{
+  if (affichlycs == true) {
+   
+    return (
+      <View style={ style.container }>
+          
+          <ScrollView contentContainerStyle={ style.scrollView }>
+              <Text style={ style.lyrics }>{lyrics}</Text>
+          </ScrollView>
+      </View>
+  );
+  }
+    
+}
+    
      return (
           
             <SafeAreaView>
               <ScrollView style={style.scrollView} contentInsetAdjustmentBehavior="automatic" >
                <View style={style.view}>
+               <Text style={style.logorouget} >Rouget Music </Text>
                 <SearchBar
                    barStyle="dark-content"
-                    placeholder="Type Here..."
+                    placeholder="Link youtube..."
                     onChangeText={updateSearch}
                     value={search}
                 />
                 <Text >{search} </Text>
-                <Button
-                style={style.title}
-                title="Search"
-               />
-                <Button title="add sound" onPress={loadAudio} />
-              </View>
+               
+                <Button style={style.addsound} title="add sound" onPress={loadAudio} />
 
-              <View>
-              {/* {audios()} */}
-              </View>
-             { imagesound()}
+                { imagesound()}
              
-              <View style={style.controls}>
-{/*                   
-                <TouchableOpacity style={style.control} onPress={this.handlePreviousTrack}>
-                  <Ionicons name='caret-back-outline' size={48} color='#444' />
-                </TouchableOpacity> */}
-                <TouchableOpacity style={style.control} onPress={handlePlayPause}>
-                    {iconeplay()}
-                </TouchableOpacity>
-                {/* <TouchableOpacity style={style.control}  onPress={this.handleNextTrack}>
-                  <Ionicons name='caret-forward-outline' size={48} color='#444' />
-                </TouchableOpacity> */}
-                </View>
-            
-              <Header />
-              {global.HermesInternal == null ? null : (
-                <View style={style.engine}>
-                  <Text style={style.footer}>Engine: Hermes</Text>
-                </View>
-              )}
-              <View style={style.body}>
-                <View style={style.sectionContainer}>
-                  <Text style={style.sectionTitle}>Step One</Text>
-                  <Text style={style.sectionDescription}>
-                    Edit <Text style={style.highlight}>App.js</Text> to change this
-                    screen and then come back to see your edits.
-                  </Text>
-                </View>
+                  <View style={style.controls}>
+
+                    <TouchableOpacity style={style.control} onPress={handlePlayPause}>
+                        {iconeplay()}
+                    </TouchableOpacity>
+                  </View>
+                  <SearchBar
+                   barStyle="dark-content"
+                    placeholder="Nome artice , Titre sound"
+                    onChangeText={updatelyrics}
+                    value={addlyrics}
+                />
+                 <Button style={style.addsound} title="add lyrics" onPress={loadlyrics} />
+                 <Image
+                  style={style.albumCover}
+                  source={{ uri: 'https://images-eu.ssl-images-amazon.com/images/I/419wjp7euJL.png' }}
+                />
+                  {selectorLang()}
+                
               </View>
+              <View>
+              {affichelyrics()}
+              </View>
+            
             </ScrollView>
+
+           
           </SafeAreaView>
           
         );
@@ -373,32 +295,7 @@ const style = StyleSheet.create({
     fontWeight: '600',
     color: Colors.black,
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-    title:{
-        fontSize:22,
-        marginTop:70,
-        marginLeft:10,
-        width:150,
-        color: 'blue',
-        fontWeight: 'bold',
-        backgroundColor: '#DF0101'
-      }, 
+ 
     view:{
         marginTop:50,
         marginLeft:10,
@@ -417,4 +314,23 @@ const style = StyleSheet.create({
     width: 250,
     height: 250
   },
+  selector: {
+    alignItems: "center",
+   
+  },
+  parole:{
+  marginLeft:30,
+  fontSize:15,
+  marginTop:120
+  },
+  lyrics: {
+    flex: 1,
+    fontSize: 17,
+    textAlign: "center"
+},
+logorouget:{
+  
+    fontSize: 20,
+    textAlign: "center"
+}
 })
